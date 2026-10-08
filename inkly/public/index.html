@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>inkly — Etsy batch builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css" />
+<script src="/config.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <button class="back" id="backBtn">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    Back
+  </button>
+  <div class="brand" id="brandHome">
+    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#9aa3b3"/></linearGradient></defs>
+      <path d="M24 6c5 7 11 12 11 20a11 11 0 11-22 0c0-8 6-13 11-20z" fill="url(#lg)"/>
+      <ellipse cx="20" cy="26" rx="3" ry="5" fill="#fff" opacity=".55"/>
+    </svg>
+    <div style="display:flex;flex-direction:column;gap:3px;">
+      <span class="wordmark">inkly</span>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <svg viewBox="0 0 30 17" fill="none" xmlns="http://www.w3.org/2000/svg" width="22" height="13" aria-hidden="true">
+          <defs><linearGradient id="iq-inkly-g" x1="0" y1="0" x2="30" y2="17" gradientUnits="userSpaceOnUse"><stop stop-color="#cdd4e0"/><stop offset="1" stop-color="#8fb6ff"/></linearGradient></defs>
+          <circle cx="3" cy="3.5" r="2" fill="url(#iq-inkly-g)"/>
+          <rect x="1.5" y="7.5" width="3" height="8.5" rx="1.5" fill="url(#iq-inkly-g)"/>
+          <circle cx="19" cy="9.5" r="6" stroke="url(#iq-inkly-g)" stroke-width="2.2" fill="none"/>
+          <line x1="23.5" y1="14" x2="28" y2="16.5" stroke="url(#iq-inkly-g)" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+        <span style="font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:.04em;">a product of inQueue</span>
+      </div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <a id="inqueueHubLink" href="#" target="_blank" rel="noopener" aria-label="Open inQueue Hub" title="inQueue Hub" style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--text-3);border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:rgba(16,18,22,.68);white-space:nowrap;transition:.2s var(--ease);text-decoration:none;" onmouseover="this.style.color='var(--text-2)';this.style.borderColor='#3a414c'" onmouseout="this.style.color='var(--text-3)';this.style.borderColor='var(--line)'">
+    <svg viewBox="0 0 30 17" fill="none" width="18" height="10" aria-hidden="true"><defs><linearGradient id="iq-inkly-hub-g" x1="0" y1="0" x2="30" y2="17" gradientUnits="userSpaceOnUse"><stop stop-color="#cdd4e0"/><stop offset="1" stop-color="#8fb6ff"/></linearGradient></defs><circle cx="3" cy="3.5" r="2" fill="url(#iq-inkly-hub-g)"/><rect x="1.5" y="7.5" width="3" height="8.5" rx="1.5" fill="url(#iq-inkly-hub-g)"/><circle cx="19" cy="9.5" r="6" stroke="url(#iq-inkly-hub-g)" stroke-width="2.2" fill="none"/><line x1="23.5" y1="14" x2="28" y2="16.5" stroke="url(#iq-inkly-hub-g)" stroke-width="2.2" stroke-linecap="round"/></svg>
+    Hub
+  </a>
+  <button class="top-icon-btn" id="reviewNavBtn" title="Generated results">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/></svg>
+    <span id="reviewCount">0</span>
+  </button>
+  <button class="top-icon-btn cart" id="cartBtn" title="Current batch">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 002 1.58h8.96a2 2 0 001.95-1.57L21 7H5.12"/></svg>
+    <span id="cartCount">0 / 30</span>
+  </button>
+  <span class="pill" id="statusPill">Batch builder · 30 max</span>
+  <button id="inqueueLogoutBtn" type="button" title="Sign out" style="margin-left:8px;font-size:11.5px;font-weight:700;color:var(--text-3);border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:rgba(16,18,22,.68);cursor:pointer;">Log out</button>
+</div>
+<script>
+  (function () {
+    const hub = (window.INQUEUE_CONFIG && window.INQUEUE_CONFIG.hubUrl) || '';
+    const link = document.getElementById('inqueueHubLink');
+    if (link && hub) link.href = hub;
+    document.getElementById('inqueueLogoutBtn').addEventListener('click', async () => {
+      try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }); }
+      finally { window.location.href = `${hub}/login`; }
+    });
+  })();
+</script>
+
+<div class="wrap">
+
+  <section class="screen active" id="screen-home">
+    <h1 class="title">Today’s batch</h1>
+    <p class="lede">Create or upload up to 30 transparent PNG designs, give each one a title and 13 keywords, then export one ready-to-upload ZIP.</p>
+    <div class="actions">
+      <button class="btn" id="startBatchBtn">Start Today’s Batch</button>
+      <button class="btn ghost" id="resumeBatchBtn" hidden>Resume Saved Batch</button>
+    </div>
+    <div class="foot">Final export is always named inkly_batch.zip with sequential D001-D030 files.</div>
+  </section>
+
+  <section class="screen" id="screen-workspace">
+    <div class="batch-head">
+      <div>
+        <p class="eyebrow">Main workspace</p>
+        <h1 class="title sm">Create or import designs</h1>
+        <p class="muted" id="workspaceStatus">Generated AI work stays in review until you add it to the batch.</p>
+      </div>
+      <div class="batch-actions">
+        <div class="mini-toggle" id="copyrightToggle">
+          <button class="on" data-cf="on">Filter ON</button>
+          <button data-cf="off">OFF</button>
+        </div>
+        <button class="btn ghost" id="openReviewBtn">Review Results</button>
+        <button class="btn" id="openBatchBtn">Current Batch</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Add design</h2>
+      <p class="sub">Choose any path. AI generations go to review first; imports can enter the batch after metadata.</p>
+      <div class="cards add-grid">
+        <button class="card" data-add="ai">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.7 5.1L19 10l-5.3 1.9L12 17l-1.7-5.1L5 10l5.3-1.9L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg></span>
+          <h3>AI Generate Design</h3>
+          <p>Create one or more designs with Etsy-style titles and keywords filled in.</p>
+          <span class="go">Open generator →</span>
+        </button>
+        <button class="card" data-add="similar">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 13l2.2-2.2a1 1 0 011.4 0L15 14"/><path d="M14 12l1-1a1 1 0 011.4 0L19 13.6"/><circle cx="8" cy="9" r="1"/></svg></span>
+          <h3>Generate Similar from Screenshot</h3>
+          <p>Upload a screenshot. Inkly generates 1 similar design in the background with a title and 13 keywords.</p>
+          <span class="go">Upload screenshot →</span>
+        </button>
+        <button class="card card--offline" data-add="cleanup">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l16-16"/><path d="M15 4l5 5"/><path d="M13 6l5 5"/><path d="M4 14l6 6"/></svg></span>
+          <h3>Clean Up Existing Design <span class="coming">Temporarily offline</span></h3>
+          <p>Run provider background removal, upscaling, and final PNG formatting.</p>
+          <span class="go">Coming back soon</span>
+        </button>
+        <button class="card" data-add="ready">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span>
+          <h3>Upload Ready PNG Designs</h3>
+          <p>Drag in up to 15 finished transparent PNGs and give each one a title and keywords.</p>
+          <span class="go">Upload PNGs →</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel tool-panel" id="toolPanel" hidden></div>
+
+  </section>
+
+  <section class="screen" id="screen-review">
+    <div class="batch-head">
+      <div>
+        <p class="eyebrow">Generated results</p>
+        <h1 class="title sm" id="reviewTitle">0 designs ready to review</h1>
+        <p class="muted">Review AI-generated results before adding them to the current batch.</p>
+      </div>
+      <div class="batch-actions">
+        <button class="btn ghost" id="reviewBackWorkspaceBtn">Main Workspace</button>
+        <button class="btn" id="reviewOpenBatchBtn">Current Batch</button>
+      </div>
+    </div>
+    <div class="review-grid" id="reviewGrid"></div>
+  </section>
+
+  <section class="screen" id="screen-batch">
+    <div class="batch-head">
+      <div>
+        <p class="eyebrow">Current batch</p>
+        <h1 class="title sm" id="batchProgress">0 / 30 Designs Added</h1>
+        <p class="muted" id="batchStatus">Add designs to start the batch.</p>
+      </div>
+      <div class="batch-actions">
+        <button class="btn ghost" id="batchBackWorkspaceBtn">Main Workspace</button>
+        <button class="btn" id="exportBatchBtn">Export Batch</button>
+      </div>
+    </div>
+    <div class="batch-grid" id="batchGrid"></div>
+  </section>
+
+  <section class="screen" id="screen-processing">
+    <div class="proc">
+      <div class="spinner"><div class="ring"></div>
+        <svg viewBox="0 0 48 48" fill="none"><path d="M24 6c5 7 11 12 11 20a11 11 0 11-22 0c0-8 6-13 11-20z" fill="currentColor"/></svg></div>
+      <h1 class="title" id="procTitle" style="font-size:24px;margin:0 0 6px">Working on it…</h1>
+      <p class="muted" id="procSub" style="margin:0"></p>
+    </div>
+  </section>
+
+</div>
+
+<div class="job-toast" id="jobToast" hidden>
+  <div class="job-toast-head">
+    <strong id="jobToastTitle">Generating designs...</strong>
+    <div class="job-toast-side">
+      <span id="jobToastCount">0 of 0</span>
+      <button class="toast-close" id="jobToastClose" aria-label="Dismiss notification">×</button>
+    </div>
+  </div>
+  <div class="job-bar"><i id="jobToastBar"></i></div>
+  <div class="job-toast-foot">
+    <span id="jobToastSub">Queued</span>
+    <button id="jobToastAction" hidden>View Results</button>
+  </div>
+</div>
+
+<div class="modal" id="previewModal" hidden>
+  <div class="modal-card preview-modal-card">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow" id="previewEyebrow">Preview design</p>
+        <h2 id="previewHeading">Design preview</h2>
+      </div>
+      <button class="icon-btn" id="closePreviewBtn" aria-label="Close">×</button>
+    </div>
+    <div class="preview-modal-grid">
+      <div class="preview-full checker"><img id="previewFullImg" alt="full design preview"></div>
+      <div class="preview-editor">
+        <div class="mini-lines preview-source">
+          <span id="previewSourceType">Source type</span>
+          <span id="previewKeywordStatus">0 / 13 keywords</span>
+        </div>
+        <div class="field"><label>Title</label><input class="input" id="previewTitleInput" placeholder="Vintage Muscle Car Shirt"></div>
+        <div class="field"><label>13 keywords <span class="opt">one per line or comma separated</span></label><textarea class="input" id="previewKeywordsInput" placeholder="muscle car shirt&#10;retro car tee&#10;car lover gift"></textarea></div>
+        <div class="notice info compact" id="previewHelp">Exactly 13 keywords are required before adding to batch.</div>
+        <div class="actions">
+          <button class="btn subtle" id="previewSaveBtn">Save Metadata</button>
+          <button class="btn" id="previewAddBtn">Add to Batch</button>
+          <button class="btn ghost" id="previewDiscardBtn">Discard</button>
+          <button class="btn ghost" id="previewCloseBtn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="readyReviewModal" hidden>
+  <div class="modal-card preview-modal-card">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">Uploaded ready designs</p>
+        <h2 id="readyReviewHeading">Design 1 of 1</h2>
+      </div>
+      <button class="icon-btn" id="closeReadyReviewBtn" aria-label="Close">×</button>
+    </div>
+    <div class="ready-review-body">
+      <button class="nav-arrow" id="readyPrevBtn" aria-label="Previous design">‹</button>
+      <div class="preview-modal-grid ready-review-grid">
+        <div class="preview-full checker"><img id="readyReviewImg" alt="uploaded design preview"></div>
+        <div class="preview-editor">
+          <div class="mini-lines preview-source">
+            <span id="readyReviewNote">Uploaded PNG</span>
+            <span id="readyReviewKeywordStatus">0 / 13 keywords</span>
+          </div>
+          <div class="field"><label>Title</label><input class="input" id="readyReviewTitleInput" placeholder="Vintage Muscle Car Shirt"></div>
+          <div class="field"><label>13 keywords <span class="opt">one per line or comma separated</span></label><textarea class="input" id="readyReviewKeywordsInput" placeholder="muscle car shirt&#10;retro car tee&#10;car lover gift"></textarea></div>
+          <div class="notice info compact" id="readyReviewHelp">Add a title and exactly 13 keywords.</div>
+          <div class="ready-review-progress" id="readyReviewProgress"></div>
+          <div class="actions">
+            <button class="btn" id="readyReviewAddAllBtn" disabled>Add Designs to Batch</button>
+            <button class="btn ghost" id="readyReviewCancelBtn">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <button class="nav-arrow" id="readyNextBtn" aria-label="Next design">›</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="metadataModal" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow" id="metadataEyebrow">Metadata</p>
+        <h2 id="metadataTitle">Edit design metadata</h2>
+      </div>
+      <button class="icon-btn" id="closeMetadataBtn" aria-label="Close">×</button>
+    </div>
+    <div class="metadata-grid">
+      <div class="preview-stage checker"><img id="metadataPreview" alt="design preview"></div>
+      <div>
+        <div class="field"><label>Title</label><input class="input" id="metaTitleInput" placeholder="Vintage Muscle Car Shirt"></div>
+        <div class="field"><label>13 keywords <span class="opt">one per line or comma separated</span></label><textarea class="input" id="metaKeywordsInput" placeholder="muscle car shirt&#10;retro car tee&#10;car lover gift"></textarea></div>
+        <div class="notice info compact" id="metadataHelp">Exactly 13 keywords are required before export.</div>
+        <div class="actions">
+          <button class="btn" id="saveMetadataBtn">Save Metadata</button>
+          <button class="btn ghost" id="cancelMetadataBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

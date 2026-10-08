@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Inkly design-system tokens ────────────────────────────────────────────── */
+:root {
+  --iq-bg:           #0a0b0d;
+  --iq-bg-2:         #101216;
+  --iq-surface:      #15171c;
+  --iq-surface-2:    #1b1e24;
+  --iq-surface-3:    #23272f;
+  --iq-line:         #2a2f38;
+  --iq-text:         #eef1f6;
+  --iq-text-2:       #aab2c0;
+  --iq-text-3:       #727b8a;
+  --iq-silver:       #cdd4e0;
+  --iq-silver-bright:#eef2f9;
+  --iq-accent:       #8fb6ff;
+  --iq-accent-2:     #6f9bff;
+  --iq-good:         #7dd7a6;
+  --iq-warn:         #f4c97a;
+  --iq-bad:          #f08a8a;
+  --iq-radius:       16px;
+  --iq-radius-sm:    10px;
+  --iq-shadow:       0 24px 60px -18px rgba(0,0,0,.7);
+  --iq-ease:         cubic-bezier(.22,.61,.36,1);
+
+  /* Tailwind theme values used via hsl() refs */
+  --background: 220 15% 4%;
+  --foreground: 220 10% 92%;
+  --card: 220 12% 9%;
+  --card-foreground: 220 10% 92%;
+  --border: 220 10% 17%;
+  --input: 220 10% 11%;
+  --ring: 220 30% 65%;
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--iq-bg);
+    background-image:
+      radial-gradient(1200px 700px at 50% -10%, #16191f 0%, transparent 60%),
+      radial-gradient(800px 500px at 85% 90%, rgba(111,155,255,.03) 0%, transparent 55%);
+    color: var(--iq-text);
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  }
+
+  code, pre, kbd, samp {
+    font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2); }
+
+  /* Focus ring */
+  :focus-visible {
+    @apply outline-none;
+    box-shadow: 0 0 0 2px rgba(143,182,255,.35);
+  }
+}
+
+@layer components {
+  /* Interactive transitions */
+  button, a, [role="button"] {
+    transition: transform 200ms var(--iq-ease), background 200ms var(--iq-ease),
+                border-color 200ms var(--iq-ease), box-shadow 200ms var(--iq-ease),
+                opacity 200ms var(--iq-ease);
+  }
+
+  /* ── Inkly-aligned card ── */
+  .iq-card {
+    background: var(--iq-surface);
+    border: 1px solid var(--iq-line);
+    border-radius: var(--iq-radius);
+    box-shadow: var(--iq-shadow);
+  }
+  .iq-card:hover {
+    border-color: #3a4150;
+    transform: translateY(-2px);
+    box-shadow: 0 28px 64px -18px rgba(0,0,0,.8);
+  }
+
+  /* ── Primary button (silver/white Inkly style) ── */
+  .iq-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--iq-radius-sm);
+    background: linear-gradient(180deg, var(--iq-silver-bright) 0%, var(--iq-silver) 100%);
+    color: var(--iq-bg);
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: none;
+    box-shadow: 0 1px 0 rgba(255,255,255,.16) inset, 0 6px 20px rgba(0,0,0,.3);
+    cursor: pointer;
+  }
+  .iq-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 1px 0 rgba(255,255,255,.22) inset, 0 10px 28px rgba(0,0,0,.4);
+  }
+  .iq-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ── Secondary button ── */
+  .iq-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: var(--iq-radius-sm);
+    background: var(--iq-surface-2);
+    color: var(--iq-text);
+    border: 1px solid var(--iq-line);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  .iq-btn-secondary:hover:not(:disabled) {
+    background: var(--iq-surface-3);
+    border-color: #3a4150;
+    transform: translateY(-1px);
+  }
+  .iq-btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ── Ghost button ── */
+  .iq-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: var(--iq-radius-sm);
+    background: transparent;
+    color: var(--iq-text-2);
+    border: 1px solid var(--iq-line);
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .iq-btn-ghost:hover:not(:disabled) {
+    background: var(--iq-surface-2);
+    color: var(--iq-text);
+    transform: translateY(-1px);
+  }
+
+  /* ── Form inputs ── */
+  .batchly-input {
+    width: 100%;
+    border-radius: var(--iq-radius-sm);
+    border: 1px solid var(--iq-line);
+    background: var(--iq-surface-2);
+    padding: 10px 13px;
+    font-size: 0.875rem;
+    color: var(--iq-text);
+    outline: none;
+    transition: border-color 180ms var(--iq-ease), box-shadow 180ms var(--iq-ease);
+    box-shadow: none;
+    appearance: none;
+  }
+  .batchly-input:focus {
+    border-color: rgba(143,182,255,.55);
+    box-shadow: 0 0 0 3px rgba(143,182,255,.1);
+  }
+  .batchly-input::placeholder { color: var(--iq-text-3); }
+  .batchly-input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .batchly-select {
+    width: 100%;
+    border-radius: var(--iq-radius-sm);
+    border: 1px solid var(--iq-line);
+    background: var(--iq-surface-2);
+    padding: 10px 13px;
+    font-size: 0.875rem;
+    color: var(--iq-text);
+    outline: none;
+    transition: border-color 180ms var(--iq-ease);
+  }
+  .batchly-select:focus { border-color: rgba(143,182,255,.55); }
+  .batchly-select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .batchly-label {
+    font-size: 0.69rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--iq-text-3);
+  }
+
+  .batchly-helper {
+    font-size: 0.75rem;
+    color: var(--iq-text-3);
+    line-height: 1.5;
+  }
+
+  /* Status dots */
+  .dot-online  { @apply w-1.5 h-1.5 rounded-full shrink-0; background: var(--iq-good); }
+  .dot-offline { @apply w-1.5 h-1.5 rounded-full shrink-0; background: var(--iq-text-3); }
+  .dot-warning { @apply w-1.5 h-1.5 rounded-full shrink-0; background: var(--iq-warn); }
+
+  /* ── Metric card animation ── */
+  .iq-metric-card {
+    transition: transform 200ms var(--iq-ease), box-shadow 200ms var(--iq-ease), border-color 200ms var(--iq-ease);
+  }
+  .iq-metric-card:hover {
+    transform: translateY(-2px);
+    border-color: #3a4150 !important;
+  }
+}

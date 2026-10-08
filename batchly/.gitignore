@@ -1,0 +1,57 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files (never commit real secrets)
+.env
+.env.*
+.env*.local
+# ...but always keep the template
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+prisma/dev.db
+prisma/dev.db-journal
+
+# Exclude real image folders from workspace; keep CSVs, READMEs, and folder skeleton
+workspace/sample-batches/*/Store_*/
+
+# Google OAuth tokens — never commit
+.tokens/
+
+# Downloaded Drive batches — local only
+workspace/downloads/
+
+# Supplemental images (size charts, promo) — local only, placed manually by operator
+workspace/supplemental-images/
+
+# Pre-Postgres SQLite migrations, kept locally only (docs/deployment.md §3)
+prisma/migrations.sqlite-archived/

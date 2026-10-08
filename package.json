@@ -1,0 +1,19 @@
+{
+  "name": "inqueue",
+  "version": "1.0.0",
+  "description": "inQueue hub — unified product suite landing page",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  },
+  "dependencies": {
+    "pg": "^8.22.0"
+  }
+}

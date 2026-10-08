@@ -1,0 +1,83 @@
+{
+  "BellaCanvas100B-AthleticHeather-FlatLayVol1-BohoBabeMockups.jpg": {
+    "type": "stbz-stamp-preset-v1",
+    "mode": "logo-and-free-shipping-stamps",
+    "storeLogo": {
+      "center": {
+        "x": 0.08116666666666666,
+        "y": 0.10104166666666667
+      },
+      "box": {
+        "width": 0.14633333333333334,
+        "height": 0.14958333333333335
+      },
+      "rotationDeg": 0
+    },
+    "freeShipping": {
+      "center": {
+        "x": 0.9138333333333334,
+        "y": 0.9204166666666667
+      },
+      "box": {
+        "width": 0.127,
+        "height": 0.13
+      },
+      "rotationDeg": 0
+    },
+    "savedAt": "2026-06-30T04:49:49.803Z"
+  },
+  "BellaCanvas100B-Black-FlatLayVol1-BohoBabeMockups.jpg": {
+    "type": "stbz-stamp-preset-v1",
+    "mode": "logo-and-free-shipping-stamps",
+    "storeLogo": {
+      "center": {
+        "x": 0.09766666666666667,
+        "y": 0.1
+      },
+      "box": {
+        "width": 0.176,
+        "height": 0.18583333333333332
+      },
+      "rotationDeg": 0
+    },
+    "freeShipping": {
+      "center": {
+        "x": 0.8988333333333334,
+        "y": 0.905
+      },
+      "box": {
+        "width": 0.127,
+        "height": 0.13
+      },
+      "rotationDeg": 0
+    },
+    "savedAt": "2026-06-21T22:25:22.522Z"
+  },
+  "BellaCanvas3001-Kelly-FoldedVol1-BohoBabeMockups.jpg": {
+    "type": "stbz-stamp-preset-v1",
+    "mode": "logo-and-free-shipping-stamps",
+    "storeLogo": {
+      "center": {
+        "x": 0.103,
+        "y": 0.11166666666666666
+      },
+      "box": {
+        "width": 0.11733333333333333,
+        "height": 0.12
+      },
+      "rotationDeg": 0
+    },
+    "freeShipping": {
+      "center": {
+        "x": 0.9051666666666667,
+        "y": 0.8891666666666667
+      },
+      "box": {
+        "width": 0.127,
+        "height": 0.13
+      },
+      "rotationDeg": 0
+    },
+    "savedAt": "2026-06-30T21:22:21.920Z"
+  }
+}

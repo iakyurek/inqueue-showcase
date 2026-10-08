@@ -1,0 +1,72 @@
+{
+  "BellaCanvas100B-AthleticHeather-FlatLayVol1-BohoBabeMockups.jpg": {
+    "type": "stbz-preset-v3",
+    "mode": "blank-mockup-visible-artwork",
+    "center": {
+      "x": 0.49266666666666664,
+      "y": 0.454375
+    },
+    "box": {
+      "width": 0.20333333333333334,
+      "height": 0.3129166666666667
+    },
+    "rotationDeg": 0,
+    "savedAt": "2026-06-30T04:50:30.791Z"
+  },
+  "BellaCanvas100B-HeatherMauve-FlatLayVol1-BohoBabeMockups.jpg": {
+    "type": "stbz-preset-v3",
+    "mode": "blank-mockup-visible-artwork",
+    "center": {
+      "x": 0.501,
+      "y": 0.43145833333333333
+    },
+    "box": {
+      "width": 0.20866666666666667,
+      "height": 0.33458333333333334
+    },
+    "rotationDeg": 0,
+    "savedAt": "2026-06-21T22:24:19.276Z"
+  },
+  "BellaCanvas100B-HeatherColumbiaBlue-FlatLayVol1-BohoBabeMockups.jpg": {
+    "type": "stbz-preset-v3",
+    "mode": "blank-mockup-visible-artwork",
+    "center": {
+      "x": 0.4985,
+      "y": 0.45625
+    },
+    "box": {
+      "width": 0.25433333333333336,
+      "height": 0.39166666666666666
+    },
+    "rotationDeg": 0,
+    "savedAt": "2026-06-29T22:19:27.704Z"
+  },
+  "BellaCanvas100B-Black-FlatLayVol1-BohoBabeMockups.jpg": {
+    "type": "stbz-preset-v3",
+    "mode": "blank-mockup-visible-artwork",
+    "center": {
+      "x": 0.5001666666666666,
+      "y": 0.43
+    },
+    "box": {
+      "width": 0.2856666666666667,
+      "height": 0.44
+    },
+    "rotationDeg": 0,
+    "savedAt": "2026-06-29T22:28:28.317Z"
+  },
+  "BellaCanvas3001-Kelly-FoldedVol1-BohoBabeMockups.jpg": {
+    "type": "stbz-preset-v3",
+    "mode": "blank-mockup-visible-artwork",
+    "center": {
+      "x": 0.5,
+      "y": 0.53
+    },
+    "box": {
+      "width": 0.236,
+      "height": 0.37833333333333335
+    },
+    "rotationDeg": 0,
+    "savedAt": "2026-06-30T21:22:23.312Z"
+  }
+}

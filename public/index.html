@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>inQueue Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+  <!-- Deployment-agnostic tool URLs. Refreshes on load; no baked-in ports. -->
+  <script src="/config.js"></script>
+</head>
+<body>
+
+<!-- ─── Topbar ──────────────────────────────────────────────────────────── -->
+<header class="topbar">
+
+  <!-- iQ brand -->
+  <div class="brand">
+    <div class="brand-icon" aria-hidden="true">
+      <svg viewBox="0 0 36 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="iq-tb-g" x1="0" y1="0" x2="36" y2="20" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#eef2f9"/>
+            <stop offset="1" stop-color="#8fb6ff"/>
+          </linearGradient>
+        </defs>
+        <!-- lowercase i -->
+        <circle cx="3.5" cy="3.5" r="2.5" fill="url(#iq-tb-g)"/>
+        <rect x="1.5" y="8" width="4" height="11" rx="2" fill="url(#iq-tb-g)"/>
+        <!-- uppercase Q -->
+        <circle cx="23" cy="11" r="7.5" stroke="url(#iq-tb-g)" stroke-width="2.8" fill="none"/>
+        <line x1="28.5" y1="16.5" x2="34" y2="19.5" stroke="url(#iq-tb-g)" stroke-width="2.8" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <span class="wordmark">inQueue</span>
+      <span class="wordmark-sub">Hub</span>
+    </div>
+  </div>
+
+  <!-- Nav tabs -->
+  <nav class="main-nav" aria-label="Main navigation">
+    <button class="nav-btn active" data-page="workflow" aria-current="page">Workflow</button>
+    <button class="nav-btn" data-page="configure">Configure</button>
+    <button class="nav-btn" data-page="stores">Store Settings</button>
+    <button class="nav-btn" data-page="connections">Connections</button>
+  </nav>
+
+  <!-- Workflow progress indicator -->
+  <div
+    class="topbar-progress"
+    role="progressbar"
+    aria-valuenow="0"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-label="Workflow progress"
+    id="progressBar"
+  >
+    <span class="progress-icon" aria-hidden="true">
+      <svg viewBox="0 0 16 16" fill="none" width="14" height="14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="1,8 6,13 15,4"/>
+      </svg>
+    </span>
+    <div class="progress-inner">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <span class="progress-label" id="progressLabel">0 / 3 steps complete</span>
+    </div>
+  </div>
+
+  <button id="logoutBtn" class="logout-btn" title="Sign out" style="margin-left:16px; background:transparent; border:1px solid #2b2f37; color:#a8adb5; padding:8px 14px; border-radius:8px; font-size:12px; cursor:pointer;">Log out</button>
+
+</header>
+<script>
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
+  window.location.href = '/login';
+});
+</script>
+
+
+<!-- ─── Section: Workflow ─────────────────────────────────────────────────── -->
+<div class="section active" id="section-workflow">
+<div class="wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h2 class="section-title">Workflow</h2>
+    <p class="muted" style="font-size:14px; margin-top: 6px;">inkly → preply → batchly. Mark each step complete as you finish it.</p>
+  </div>
+
+  <!-- Drive folder quick-link -->
+  <div class="drive-banner">
+    <div class="drive-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        <polyline points="12,11 12,17"/>
+        <polyline points="9,14 12,17 15,14"/>
+      </svg>
+    </div>
+    <div class="drive-copy">
+      <strong>Pending Batches — Google Drive Folder</strong>
+      <p>After exporting from Preply, upload the batch folder here. Batchly picks it up on the next scan.</p>
+    </div>
+    <a
+      href="https://drive.google.com/drive/u/0/folders/1yWL_oBayqXL3RK7pjaJxBVBDTt_Qk5E7"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn accent"
+      aria-label="Open pending batches Google Drive folder (opens in new tab)"
+    >
+      <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
+        <path d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+        <path d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+      </svg>
+      Open Drive Folder
+    </a>
+  </div>
+
+  <!-- Workflow cards flow -->
+  <div class="workflow-flow" role="list" aria-label="Workflow steps">
+
+    <!-- ── inkly ── -->
+    <article class="tool-card" role="listitem" id="card-inkly" aria-label="Step 1: inkly">
+      <div class="step-badge"><span class="step-num">01</span> Design</div>
+      <div class="tool-logo-wrap">
+        <div class="tool-icon-box" aria-hidden="true">
+          <!-- inkly flame icon -->
+          <svg viewBox="0 0 48 48" fill="none">
+            <defs><linearGradient id="inkly-g" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#9aa3b3"/></linearGradient></defs>
+            <path d="M24 6c5 7 11 12 11 20a11 11 0 11-22 0c0-8 6-13 11-20z" fill="url(#inkly-g)"/>
+            <ellipse cx="20" cy="26" rx="3" ry="5" fill="#fff" opacity=".5"/>
+          </svg>
+        </div>
+        <span class="tool-name">inkly</span>
+      </div>
+      <p class="tool-desc">Makes the transparent PNG designs, each with a title and 13 keywords.</p>
+      <ul class="tool-steps">
+        <li>AI design generation with Etsy-style metadata</li>
+        <li>Similar-design creation from screenshots</li>
+        <li>Export up to 30 designs as <code>inkly_batch.zip</code></li>
+      </ul>
+      <div class="status-row" id="status-inkly">
+        <span class="status-dot" id="dot-inkly"></span>
+        <span class="status-text dim" id="statustext-inkly">Not started</span>
+      </div>
+      <div class="card-actions">
+        <a id="toolLink-inkly" href="#" target="_blank" rel="noopener" class="btn sm" aria-label="Open inkly in a new tab">
+          Open inkly →
+        </a>
+        <button class="btn ghost sm" data-mark="inkly" id="markbtn-inkly" aria-pressed="false">
+          Mark complete
+        </button>
+      </div>
+    </article>
+
+    <!-- arrow -->
+    <div class="flow-arrow" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12,5 19,12 12,19"/>
+      </svg>
+    </div>
+
+    <!-- ── preply ── -->
+    <article class="tool-card" role="listitem" id="card-preply" aria-label="Step 2: preply">
+      <div class="step-badge"><span class="step-num">02</span> Prepare</div>
+      <div class="tool-logo-wrap">
+        <div class="tool-icon-box" aria-hidden="true">
+          <!-- preply chef hat icon -->
+          <svg viewBox="0 0 40 40" fill="none">
+            <defs><linearGradient id="preply-g" x1="4" y1="2" x2="36" y2="40" gradientUnits="userSpaceOnUse"><stop stop-color="#eef2f9"/><stop offset="1" stop-color="#8fb6ff"/></linearGradient></defs>
+            <rect x="6" y="28" width="28" height="8" rx="4" fill="url(#preply-g)"/>
+            <rect x="11" y="17" width="18" height="13" fill="url(#preply-g)"/>
+            <ellipse cx="20" cy="15" rx="10" ry="9" fill="url(#preply-g)"/>
+            <rect x="11" y="26" width="18" height="2" rx="1" fill="rgba(10,11,13,0.22)"/>
+          </svg>
+        </div>
+        <span class="tool-name">preply</span>
+      </div>
+      <p class="tool-desc">Puts each design on mockups for every store and assigns SKUs.</p>
+      <ul class="tool-steps">
+        <li>Upload inkly_batch.zip and scan for new SKUs</li>
+        <li>Place designs on store mockups (t-shirts, hoodies, etc.)</li>
+        <li>Review and confirm metadata per design</li>
+        <li>Export a structured ZIP ready for Batchly</li>
+      </ul>
+      <div class="status-row" id="status-preply">
+        <span class="status-dot" id="dot-preply"></span>
+        <span class="status-text dim" id="statustext-preply">Waiting for inkly</span>
+      </div>
+      <div class="card-actions">
+        <a id="toolLink-preply" href="#" target="_blank" rel="noopener" class="btn sm" aria-label="Open preply in a new tab">
+          Open preply →
+        </a>
+        <a id="toolLink-preply-ready" href="#" target="_blank" rel="noopener" class="btn ghost sm" aria-label="Open Ready Mockups stamping in preply in a new tab" title="Stamp store logos onto finished mockups — ZIP only, no Drive or SKUs">
+          Ready mockups
+        </a>
+        <button class="btn ghost sm" data-mark="preply" id="markbtn-preply" aria-pressed="false">
+          Mark complete
+        </button>
+      </div>
+    </article>
+
+    <!-- arrow -->
+    <div class="flow-arrow" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12,5 19,12 12,19"/>
+      </svg>
+    </div>
+
+    <!-- ── batchly ── -->
+    <article class="tool-card" role="listitem" id="card-batchly" aria-label="Step 3: batchly">
+      <div class="step-badge"><span class="step-num">03</span> Publish</div>
+      <div class="tool-logo-wrap">
+        <div class="tool-icon-box" aria-hidden="true">
+          <!-- batchly picnic basket icon -->
+          <svg viewBox="0 0 40 40" fill="none">
+            <defs><linearGradient id="batchly-g" x1="5" y1="5" x2="35" y2="38" gradientUnits="userSpaceOnUse"><stop stop-color="#eef2f9"/><stop offset="1" stop-color="#8fb6ff"/></linearGradient></defs>
+            <path d="M13 16 C13 8 27 8 27 16" stroke="url(#batchly-g)" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+            <rect x="7.5" y="14.5" width="25" height="4.5" rx="2.25" fill="url(#batchly-g)"/>
+            <rect x="9" y="19" width="22" height="14.5" rx="2.5" fill="url(#batchly-g)"/>
+            <rect x="9" y="23.5" width="22" height="1" rx="0.5" fill="rgba(10,11,13,.2)"/>
+            <rect x="9" y="27.5" width="22" height="1" rx="0.5" fill="rgba(10,11,13,.2)"/>
+            <rect x="9" y="31.5" width="22" height="1" rx="0.5" fill="rgba(10,11,13,.2)"/>
+            <rect x="17.5" y="15.5" width="5" height="3" rx="1.5" fill="rgba(10,11,13,.3)"/>
+          </svg>
+        </div>
+        <span class="tool-name">batchly</span>
+      </div>
+      <p class="tool-desc">Creates the Etsy draft listings in the right store.</p>
+      <ul class="tool-steps">
+        <li>Import batch from Google Drive or local folder</li>
+        <li>Validate manifest against store configuration</li>
+        <li>Create Etsy draft listings (never auto-published)</li>
+        <li>Review per-store readiness and listing QA</li>
+      </ul>
+      <div class="status-row" id="status-batchly">
+        <span class="status-dot" id="dot-batchly"></span>
+        <span class="status-text dim" id="statustext-batchly">Waiting for preply</span>
+      </div>
+      <div class="card-actions">
+        <a id="toolLink-batchly" href="#" target="_blank" rel="noopener" class="btn sm" aria-label="Open batchly in a new tab">
+          Open batchly →
+        </a>
+        <button class="btn ghost sm" data-mark="batchly" id="markbtn-batchly" aria-pressed="false">
+          Mark complete
+        </button>
+      </div>
+    </article>
+
+  </div><!-- /workflow-flow -->
+
+  <!-- Reset progress -->
+  <div style="margin-top: 32px; text-align: right;">
+    <button class="btn ghost sm" id="resetProgressBtn" aria-label="Reset all workflow step completion">
+      Reset progress
+    </button>
+  </div>
+
+</div><!-- /wrap -->
+</div><!-- /section-workflow -->
+
+
+<!-- ─── Section: Configure ────────────────────────────────────────────────── -->
+<div class="section" id="section-configure">
+<div class="stores-wrap">
+
+  <div class="stores-header" style="margin-bottom: 24px;">
+    <div>
+      <p class="eyebrow">Configure</p>
+      <h2 class="section-title">Store Configuration</h2>
+      <p class="muted" style="font-size:14px; margin-top: 6px; max-width: 640px;">
+        Preply and Batchly only use a store once it is enabled and every check below passes.
+      </p>
+    </div>
+    <div class="cfg-sync-strip" id="cfgSyncStrip" aria-live="polite">
+      <!-- sync chips + Sync now (populated by configure.js) -->
+    </div>
+  </div>
+
+  <div id="cfgBanner" class="cfg-banner" hidden></div>
+
+  <!-- Shared draft presets -->
+  <div class="store-panel cfg-presets" id="cfgPresetsPanel">
+    <p style="color: var(--text-3); font-size: 13px; padding: 20px 24px; margin: 0;">Loading configuration…</p>
+  </div>
+
+  <!-- Six fixed store slots -->
+  <div class="cfg-cards" id="cfgCards"></div>
+
+</div><!-- /stores-wrap -->
+</div><!-- /section-configure -->
+
+<!-- ─── Section: Store Settings ──────────────────────────────────────────── -->
+<div class="section" id="section-stores">
+<div class="stores-wrap">
+
+  <div style="margin-bottom: 32px;">
+    <p class="eyebrow">Store settings</p>
+    <h2 class="section-title">Store Mappings</h2>
+    <p class="muted" style="font-size:14px; margin-top: 6px;">
+      Each store in Preply must map to the same folder used by Batchly. This page shows both sides so you can verify alignment before running a batch.
+    </p>
+  </div>
+
+  <!-- Safety notice (always visible) -->
+  <div class="safety-notice" role="alert" aria-live="polite">
+    <span class="sn-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </span>
+    <div>
+      <h3>Critical mapping — do not change</h3>
+      <p><strong>NorthWindUS = Store_A.</strong> Store_A holds NorthWindUS Etsy credentials and must never be reassigned to any other store or folder.</p>
+      <p>Do not move NorthWindUS to Store_C or any other slot. Etsy credentials are bound to Batchly's Store_A identity — moving them would disconnect the live store.</p>
+    </div>
+  </div>
+
+  <!-- Batchly connection status (populated by JS) -->
+  <div id="batchlyStatusBanner" hidden></div>
+
+  <!-- Store mapping table -->
+  <div class="store-panel">
+    <div class="store-panel-header">
+      <div>
+        <h2>Store → Folder Mapping</h2>
+        <p>Preply store names and their corresponding Batchly drive folder. The folder name is the shared key.</p>
+      </div>
+      <button class="btn ghost sm" id="refreshStoresBtn" aria-label="Refresh store data">
+        <svg viewBox="0 0 24 24" fill="none" width="13" height="13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+    <div class="store-table-wrap">
+      <table class="store-table" aria-label="Store folder mappings">
+        <thead>
+          <tr>
+            <th scope="col">Folder</th>
+            <th scope="col">Preply Store Name</th>
+            <th scope="col">Preply SKU Prefix</th>
+            <th scope="col">Batchly DB Name</th>
+            <th scope="col">Etsy Connection</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody id="storeTableBody">
+          <tr class="skeleton-row">
+            <td colspan="6" style="text-align:center; padding: 32px;">Loading store data…</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Instructions panel -->
+  <div class="store-panel" style="padding: 20px 24px;">
+    <h3 style="margin: 0 0 12px; font-size: 15px; font-weight: 700;">How store mappings work</h3>
+    <ul style="margin: 0; padding: 0 0 0 18px; font-size: 13px; color: var(--text-2); line-height: 1.7; display: flex; flex-direction: column; gap: 6px; list-style: disc;">
+      <li>The <strong>folder name</strong> (Store_A, Store_B, …) is the shared key between Preply and Batchly. Both tools must use the exact same value.</li>
+      <li>Preply reads store names from <code style="font-size:11.5px; background: var(--bg-2); border: 1px solid var(--line); border-radius:5px; padding:1px 6px;">preply/data/stores.json</code>. The <code style="font-size:11.5px; background: var(--bg-2); border: 1px solid var(--line); border-radius:5px; padding:1px 6px;">store_folder</code> field must match a Batchly <code style="font-size:11.5px; background: var(--bg-2); border: 1px solid var(--line); border-radius:5px; padding:1px 6px;">driveFolderName</code>.</li>
+      <li>Batchly stores are seeded via Prisma. Names in Batchly (e.g., "Store A") are display labels; the canonical identifier is the <code style="font-size:11.5px; background: var(--bg-2); border: 1px solid var(--line); border-radius:5px; padding:1px 6px;">driveFolderName</code> field.</li>
+      <li>Etsy credentials are linked to Batchly stores by ID. Reassigning a store's <code style="font-size:11.5px; background: var(--bg-2); border: 1px solid var(--line); border-radius:5px; padding:1px 6px;">driveFolderName</code> would sever the credential link for that store.</li>
+      <li>To update a store name in Preply: edit <code style="font-size:11.5px; background: var(--bg-2); border: 1px solid var(--line); border-radius:5px; padding:1px 6px;">preply/data/stores.json</code> directly. The <code style="font-size:11.5px; background: var(--bg-2); border: 1px solid var(--line); border-radius:5px; padding:1px 6px;">store_folder</code> value must not change for a store that already has Batchly credentials.</li>
+    </ul>
+  </div>
+
+</div><!-- /stores-wrap -->
+</div><!-- /section-stores -->
+
+<!-- ─── Section: Connections ──────────────────────────────────────────────── -->
+<div class="section" id="section-connections">
+<div class="wrap stores-wrap">
+
+  <div class="stores-header">
+    <div>
+      <h1>Connections</h1>
+      <p class="stores-sub">Live connection health across Preply, Batchly, Google Drive, and Etsy. Read-only — manage each connection inside its tool.</p>
+    </div>
+    <button class="btn ghost sm" id="refreshConnectionsBtn" aria-label="Refresh connection status">
+      <svg viewBox="0 0 24 24" fill="none" width="13" height="13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      Refresh
+    </button>
+  </div>
+
+  <div id="connectionsWarnings" class="store-panel conn-warnings" hidden style="padding: 18px 24px;"></div>
+
+  <div class="conn-grid" id="connectionsGrid">
+    <div class="store-panel conn-card" id="connCard-preply" style="padding: 20px 24px;">
+      <p style="color: var(--text-3); font-size: 13px;">Loading Preply status…</p>
+    </div>
+    <div class="store-panel conn-card" id="connCard-batchly" style="padding: 20px 24px;">
+      <p style="color: var(--text-3); font-size: 13px;">Loading Batchly status…</p>
+    </div>
+  </div>
+
+</div><!-- /stores-wrap -->
+</div><!-- /section-connections -->
+
+<script src="/app.js"></script>
+<script src="/configure.js"></script>
+</body>
+</html>

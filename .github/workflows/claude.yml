@@ -1,0 +1,145 @@
+name: Claude Code PR Builder
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+  id-token: write
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    if: |
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude')) ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@v1
+        with:
+          show_full_output: true
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          prompt: |
+            You are working inside the GitHub Actions workspace for this repository.
+
+            Important:
+            - Actually modify the repository files.
+            - Do not only summarize.
+            - Do not only comment.
+            - Do not try to create the pull request yourself.
+            - A later workflow step will create the pull request from your file changes.
+            - Make the smallest safe implementation that satisfies the issue.
+
+            Repository: ${{ github.repository }}
+            Issue number: ${{ github.event.issue.number }}
+            Issue title: ${{ github.event.issue.title }}
+
+            Issue body:
+            ${{ github.event.issue.body }}
+
+            Latest triggering comment, if any:
+            ${{ github.event.comment.body }}
+
+            Task:
+            Implement the Render one-login SSO launch flow across the inQueue hub, Inkly, Preply, and Batchly.
+
+            Required behavior:
+            - User logs in once from the inQueue hub.
+            - User can access Inkly, Preply, and Batchly from the hub without seeing another login screen.
+            - If a user directly opens Inkly, Preply, or Batchly while unauthenticated, redirect them to the inQueue hub login page.
+            - After login, redirect them back to the originally requested tool/path.
+            - Use browser-session cookies with no Max-Age and no Expires.
+            - Use HttpOnly, Secure in production, SameSite=Lax, Path=/.
+            - Do not use localStorage for auth.
+            - Do not expose auth tokens to frontend JavaScript.
+            - Do not weaken existing auth checks.
+
+            Implementation requirements:
+            - Add hub route GET /auth/launch?tool=<inkly|preply|batchly>&next=<relative-path>.
+            - If hub user is not authenticated, redirect to /login?next=<encoded launch path>.
+            - If authenticated, generate a short-lived HMAC-signed SSO ticket using INQUEUE_SESSION_SECRET.
+            - Ticket includes username, tool, next, iat, exp 60 seconds, and nonce.
+            - Redirect to the selected tool's SSO callback.
+            - Hub dashboard tool links must point to /auth/launch instead of directly to tool URLs.
+            - Add SSO callback route to Inkly.
+            - Add SSO callback route to Preply.
+            - Add SSO callback route to Batchly.
+            - Each tool validates ticket signature, expiration, tool claim, and safe relative next path.
+            - Each tool rejects external next URLs.
+            - Each tool sets its own local session cookie:
+              - Inkly: inqueue_inkly_session
+              - Preply: inqueue_preply_session
+              - Batchly: inqueue_batchly_session
+            - If unauthenticated browser navigation hits a tool, redirect to INQUEUE_HUB_URL/auth/launch?tool=<tool>&next=<current-relative-path>.
+            - If unauthenticated API request hits a tool, return 401 JSON instead of redirecting.
+
+            Security:
+            - Ticket lifetime max 60 seconds.
+            - Use existing INQUEUE_SESSION_SECRET.
+            - Do not accept unsigned tickets.
+            - Do not accept malformed tickets.
+            - Do not allow open redirects.
+            - Redact ticket values from logs.
+            - Do not solve this with Domain=.onrender.com.
+
+            Do not touch:
+            - Etsy draft creation logic
+            - Store_A / NorthWindUS mapping
+            - Stores B-F activation
+            - live Etsy writes
+            - live Google Drive writes
+            - secrets
+            - .env files
+
+            After implementation:
+            - Run relevant tests if available.
+            - Leave all file changes in the working tree so the next workflow step can create the PR.
+          claude_args: --max-turns 35 --allowedTools "Read,Write,Edit,MultiEdit,Glob,Grep,LS,Bash(git status:*),Bash(git diff:*),Bash(npm test:*),Bash(npm run:*),Bash(node:*),Bash(npx:*)"
+
+      - name: Show changes
+        run: |
+          git status --short
+          git diff --stat
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ github.token }}
+          branch: claude/render-sso-${{ github.run_id }}
+          base: main
+          delete-branch: true
+          commit-message: "fix: implement Render SSO launch flow"
+          title: "fix: implement Render one-login SSO across inQueue tools"
+          body: |
+            This PR was generated by Claude Code from issue #${{ github.event.issue.number }}.
+
+            Scope:
+            - Implements hub-controlled SSO launch flow for Render services.
+            - Adds per-tool local session cookies.
+            - Redirects unauthenticated direct tool visits back through the hub.
+            - Keeps API requests returning 401 JSON when unauthenticated.
+
+            Safety constraints:
+            - Etsy draft creation logic should not be changed.
+            - Store_A / NorthWindUS mapping should not be changed.
+            - Stores B-F should not be activated.
+            - No secrets or .env files should be committed.
+          labels: |
+            claude
+            auth
+            render

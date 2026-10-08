@@ -1,0 +1,307 @@
+// Postgres everywhere (docs/deployment.md §3). Local dev runs against a local
+// PostgreSQL (see .env.example for DATABASE_URL); Render uses managed
+// Postgres. The pre-switch SQLite migrations are archived locally in
+// prisma/migrations.sqlite-archived/ (gitignored) — do NOT apply them here.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Status fields predate the switch to Postgres and stay String (not native
+// enums) — valid values are enforced by TypeScript types in src/types/index.ts.
+// BatchStatus:   PENDING | VALIDATING | READY | PROCESSING | DONE | ERROR
+// ListingStatus: PENDING | DOWNLOADING | READY | UPLOADING | DRAFT_CREATED | ERROR | NEEDS_REVIEW
+// LogLevel:      INFO | WARN | ERROR
+
+model Store {
+  id              String   @id @default(cuid())
+  name            String
+  etsyShopName    String?
+  driveFolderName String   @unique
+  skuPrefix       String
+  accessToken     String?
+  refreshToken    String?
+  tokenExpiresAt  DateTime?
+  etsyShopId      String?
+  // Hub-managed enablement (inQueue store config sync). Tri-state:
+  //   null  = never synced from the hub (fall back to the legacy allowlist)
+  //   true  = enabled in the hub Configure tab
+  //   false = disabled in the hub Configure tab
+  // Consulted only when INQUEUE_STORE_CONFIG_SOURCE=hub (see draftFlowHelpers).
+  configEnabled   Boolean?
+  createdAt       DateTime @default(now())
+
+  listings    Listing[]
+  batchStores BatchStore[]
+  etsyIds     StoreEtsyIds?
+}
+
+// App-level key/value settings editable from the UI (e.g. Drive pending-folder
+// ID). Values persisted here take precedence over env vars; env is the
+// deploy-time fallback. Works identically on SQLite (dev) and Postgres (prod).
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model GlobalListingPreset {
+  id                  String  @id @default(cuid())
+  whoMade             String  @default("i_did")
+  whenMade            String  @default("made_to_order")
+  listingType         String  @default("physical")
+  renewalOption       String  @default("automatic")
+  isPersonalizable    Boolean @default(false)
+  defaultQuantity     Int     @default(1)
+  defaultPrice        String  @default("9.99")
+  descriptionTemplate String?
+  // Materials sent with every listing
+  materials           String  @default("Cotton,bella canvas,gildan")
+  // Item weight (e.g. 4 oz)
+  itemWeight          Float   @default(4)
+  itemWeightUnit      String  @default("oz")
+  // Item packed dimensions
+  itemLength          Float   @default(13)
+  itemWidth           Float   @default(10)
+  itemHeight          Float   @default(1)
+  itemDimensionsUnit  String  @default("in")
+}
+
+model GlobalVariationPreset {
+  id                   String   @id @default(cuid())
+  enabled              Boolean  @default(false)
+  variation1Name       String   @default("Size")
+  variation1PropertyId String?
+  variation1Options    String   @default("S,M,L,XL,2XL,3XL")
+  variation2Name       String   @default("Color")
+  variation2PropertyId String?
+  variation2Options    String   @default("Black,White,Ash,Sport Grey,Navy")
+  quantityPerVariation Int      @default(999)
+  priceMode            String   @default("manifest")
+  skuMode              String   @default("base-option-combo")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model GlobalSupplementalImagePreset {
+  id                    String   @id @default(cuid())
+  enabled               Boolean  @default(true)
+  includeSizeCharts     Boolean  @default(true)
+  sizeChartRequiredCount Int     @default(3)
+  includePromoImages    Boolean  @default(false)
+  sizeChartFolder       String   @default("workspace/supplemental-images/size-charts")
+  promoFolder           String   @default("workspace/supplemental-images/promo")
+  maxSupplementalImages Int      @default(4)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model StoreEtsyIds {
+  id                String  @id @default(cuid())
+  storeId           String  @unique
+  taxonomyId        String?
+  shippingProfileId String?
+  readinessStateId  String?
+  returnPolicyId    String?
+  sectionId         String?
+
+  store Store @relation(fields: [storeId], references: [id])
+}
+
+model Batch {
+  id          String   @id @default(cuid())
+  name        String
+  driveFolder String?
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+
+  stores   BatchStore[]
+  designs  Design[]
+  listings Listing[]
+  logs     BatchLog[]
+}
+
+model BatchStore {
+  id      String @id @default(cuid())
+  batchId String
+  storeId String
+
+  batch Batch @relation(fields: [batchId], references: [id])
+  store Store @relation(fields: [storeId], references: [id])
+
+  @@unique([batchId, storeId])
+}
+
+model Design {
+  id         String @id @default(cuid())
+  designCode String
+  batchId    String
+
+  batch    Batch     @relation(fields: [batchId], references: [id])
+  listings Listing[]
+
+  @@unique([batchId, designCode])
+}
+
+model Listing {
+  id            String   @id @default(cuid())
+  batchId       String
+  storeId       String
+  designId      String
+  sku           String
+  title         String
+  description   String
+  tags          String
+  price         Float
+  productType   String
+  status        String   @default("PENDING")
+  etsyListingId String?
+  errorMessage  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  batch  Batch  @relation(fields: [batchId], references: [id])
+  store  Store  @relation(fields: [storeId], references: [id])
+  design Design @relation(fields: [designId], references: [id])
+
+  images ListingImage[]
+}
+
+model ListingImage {
+  id        String @id @default(cuid())
+  listingId String
+  localPath String
+  sortOrder Int
+
+  listing Listing @relation(fields: [listingId], references: [id])
+}
+
+model DraftCreationRun {
+  id                 String    @id @default(cuid())
+  storeId            String
+  storeFolder        String
+  batchFolder        String
+  requestedDesignIds String
+  status             String    @default("started")
+  createdCount       Int       @default(0)
+  skippedCount       Int       @default(0)
+  failedCount        Int       @default(0)
+  startedAt          DateTime  @default(now())
+  completedAt        DateTime?
+
+  records DraftCreationRecord[]
+}
+
+model DraftCreationRecord {
+  id              String   @id @default(cuid())
+  runId           String?
+  storeId         String
+  storeFolder     String
+  batchFolder     String
+  designId        String
+  sku             String?
+  title           String?
+  listingId       String?
+  status          String
+  imagesAttempted Int      @default(0)
+  imagesUploaded  Int      @default(0)
+  warnings        String?
+  errors          String?
+  imageErrors     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  run DraftCreationRun? @relation(fields: [runId], references: [id])
+
+  @@unique([storeId, batchFolder, designId])
+}
+
+model BatchLog {
+  id        String   @id @default(cuid())
+  batchId   String
+  level     String   @default("INFO")
+  message   String
+  createdAt DateTime @default(now())
+
+  batch Batch @relation(fields: [batchId], references: [id])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 8B: Durable batch run tracking
+// status values: queued | running | completed | partial | failed | canceled
+// ---------------------------------------------------------------------------
+
+model BatchRun {
+  id          String    @id @default(cuid())
+  batchFolder String
+  status      String    @default("queued")
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  totalStores Int       @default(0)
+  totalRows   Int       @default(0)
+  attempted   Int       @default(0)
+  created     Int       @default(0)
+  skipped     Int       @default(0)
+  partial     Int       @default(0)
+  failed      Int       @default(0)
+  errorMessage String?
+
+  stores BatchRunStore[]
+  rows   BatchRunRow[]
+}
+
+model BatchRunStore {
+  id          String    @id @default(cuid())
+  runId       String
+  storeFolder String
+  storeName   String
+  storeId     String?
+  status      String    @default("queued")
+  skipReason  String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  attempted   Int       @default(0)
+  created     Int       @default(0)
+  skipped     Int       @default(0)
+  partial     Int       @default(0)
+  failed      Int       @default(0)
+
+  run  BatchRun     @relation(fields: [runId], references: [id])
+  rows BatchRunRow[]
+}
+
+model BatchRunRow {
+  id                          String    @id @default(cuid())
+  runId                       String
+  storeRunId                  String
+  storeFolder                 String
+  batchFolder                 String
+  designId                    String
+  sku                         String?
+  title                       String?
+  status                      String    @default("queued")
+  listingId                   String?
+  imagesAttempted             Int       @default(0)
+  imagesUploaded              Int       @default(0)
+  imageErrors                 String?
+  variationInventoryStatus    String    @default("disabled")
+  variationProductCount       Int?
+  variationError              String?
+  supplementalImageStatus     String    @default("disabled")
+  supplementalImagesAttempted Int       @default(0)
+  supplementalImagesUploaded  Int       @default(0)
+  supplementalImageErrors     String?
+  warnings                    String?
+  errors                      String?
+  startedAt                   DateTime?
+  completedAt                 DateTime?
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+
+  run      BatchRun      @relation(fields: [runId], references: [id])
+  storeRun BatchRunStore @relation(fields: [storeRunId], references: [id])
+}

@@ -1,0 +1,29 @@
+{
+  "name": "preply-batch-prep",
+  "version": "1.0.0",
+  "description": "Preply prepares PNG design batches, SKU reservations, mockups, manifests, and Batchly-ready ZIP exports.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "googleapis": "^144.0.0",
+    "jszip": "^3.10.1",
+    "pg": "^8.22.0"
+  },
+  "keywords": [
+    "preply",
+    "batchly",
+    "mockups",
+    "etsy",
+    "png",
+    "canvas"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}

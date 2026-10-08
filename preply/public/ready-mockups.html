@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ready Mockups | preply</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/ready-mockups.css" />
+  <script src="/config.js"></script>
+</head>
+<body class="rm-body">
+  <header class="topbar">
+    <div class="brand-wrap">
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+          <defs>
+            <linearGradient id="chef-g" x1="4" y1="2" x2="36" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#eef2f9"/>
+              <stop offset="1" stop-color="#8fb6ff"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="28" width="28" height="8" rx="4" fill="url(#chef-g)"/>
+          <rect x="11" y="17" width="18" height="13" fill="url(#chef-g)"/>
+          <ellipse cx="20" cy="15" rx="10" ry="9" fill="url(#chef-g)"/>
+          <rect x="11" y="26" width="18" height="2" rx="1" fill="rgba(10,11,13,0.22)"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <p class="wordmark">preply</p>
+        <div class="product-line">
+          <svg class="iq-logo" viewBox="0 0 30 17" fill="none" xmlns="http://www.w3.org/2000/svg" width="26" height="14">
+            <defs>
+              <linearGradient id="iq-g" x1="0" y1="0" x2="30" y2="17" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#cdd4e0"/>
+                <stop offset="1" stop-color="#8fb6ff"/>
+              </linearGradient>
+            </defs>
+            <circle cx="3" cy="3.5" r="2" fill="url(#iq-g)"/>
+            <rect x="1.5" y="7.5" width="3" height="8.5" rx="1.5" fill="url(#iq-g)"/>
+            <circle cx="19" cy="9.5" r="6" stroke="url(#iq-g)" stroke-width="2.2" fill="none"/>
+            <line x1="23.5" y1="14" x2="28" y2="16.5" stroke="url(#iq-g)" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+          <span>a product of inQueue</span>
+        </div>
+      </div>
+    </div>
+    <nav class="nav-tabs" aria-label="Workflows">
+      <a class="nav-tab-link" href="/">Batch workflow</a>
+      <a class="nav-tab-link active" href="/ready-mockups" aria-current="page">Ready Mockups</a>
+    </nav>
+    <div class="rm-topbar-actions">
+      <a id="inqueueHubLink" class="rm-pill" href="#" target="_blank" rel="noopener">Hub</a>
+      <button id="inqueueLogoutBtn" class="rm-pill" type="button">Log out</button>
+    </div>
+  </header>
+
+  <main class="app-shell rm-shell">
+    <section class="rm-intro">
+      <div>
+        <h1>Ready Mockups</h1>
+        <p class="rm-lede">Upload mockups that are already done, stamp each store's logo, and download one ZIP with a folder per store. Nothing goes to Google Drive and no SKUs are reserved.</p>
+      </div>
+      <dl class="rm-stats" aria-live="polite">
+        <div><dt>Mockups</dt><dd id="statMockups">0</dd></div>
+        <div><dt>Logos included</dt><dd id="statLogos">0</dd></div>
+        <div><dt>Images in ZIP</dt><dd id="statOutput">0</dd></div>
+      </dl>
+    </section>
+
+    <!-- 1. Logos -->
+    <section class="panel rm-panel" aria-labelledby="logosTitle">
+      <header class="rm-panel-head">
+        <div>
+          <p class="rm-step">Step 1</p>
+          <h2 id="logosTitle">Store logos</h2>
+          <p class="rm-help">Each logo's name becomes its folder name in the ZIP. Untick a logo to leave that store out.</p>
+        </div>
+        <div class="button-row">
+          <button id="importStoreLogosBtn" class="ghost-button" type="button">Import from Store Settings</button>
+          <button id="uploadLogosBtn" class="secondary-button" type="button">Upload logos</button>
+          <input id="logoFileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+          <input id="logoReplaceInput" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+        </div>
+      </header>
+      <div id="logoGrid" class="rm-logo-grid" aria-live="polite"></div>
+      <p id="logoEmpty" class="rm-empty">No logos yet. Upload logo files, or import the logos already set up in Store Settings.</p>
+    </section>
+
+    <!-- 2. Mockups -->
+    <section class="panel rm-panel" aria-labelledby="mockupsTitle">
+      <header class="rm-panel-head">
+        <div>
+          <p class="rm-step">Step 2</p>
+          <h2 id="mockupsTitle">Ready mockups</h2>
+          <p class="rm-help">PNG, JPG, or WebP files, or a ZIP of them. They stay in this browser tab — nothing is uploaded.</p>
+        </div>
+        <div class="button-row">
+          <button id="clearMockupsBtn" class="ghost-button" type="button" disabled>Clear all</button>
+          <button id="addMockupsBtn" class="secondary-button" type="button">Add mockups</button>
+          <input id="mockupFileInput" type="file" accept="image/png,image/jpeg,image/webp,.zip,application/zip" multiple hidden />
+        </div>
+      </header>
+      <div id="mockupDrop" class="rm-drop" tabindex="0" role="button" aria-label="Add mockups: drop files here or press Enter to browse">
+        <p class="rm-drop-title">Drop mockups or a ZIP here</p>
+        <p class="rm-drop-sub">or click to browse</p>
+      </div>
+      <div id="mockupGrid" class="rm-mockup-grid"></div>
+    </section>
+
+    <!-- 3. Placement -->
+    <section class="panel rm-panel" aria-labelledby="placementTitle">
+      <header class="rm-panel-head">
+        <div>
+          <p class="rm-step">Step 3</p>
+          <h2 id="placementTitle">Logo placement</h2>
+          <p class="rm-help">Drag the logo to move it, drag the corner handle to resize, or click anywhere on the mockup to put it there.</p>
+        </div>
+        <span id="saveStatus" class="rm-save-status" aria-live="polite"></span>
+      </header>
+
+      <div class="rm-editor">
+        <div class="rm-stage-wrap">
+          <canvas id="editorCanvas" class="rm-stage" tabindex="0" aria-label="Logo placement editor. Arrow keys nudge the logo."></canvas>
+          <p id="editorEmpty" class="rm-stage-empty">Add a mockup and a logo to start placing.</p>
+        </div>
+
+        <div class="rm-controls">
+          <div class="rm-field">
+            <span class="rm-label">Apply changes to</span>
+            <div class="rm-segmented" role="radiogroup" aria-label="Apply changes to">
+              <button type="button" role="radio" data-scope="all" aria-checked="true">All mockups</button>
+              <button type="button" role="radio" data-scope="mockup" aria-checked="false">This mockup only</button>
+            </div>
+            <p id="scopeNote" class="rm-note"></p>
+            <button id="clearOverrideBtn" class="ghost-button rm-small" type="button" hidden>Use the all-mockups placement here</button>
+          </div>
+
+          <label class="rm-field">
+            <span class="rm-label">Preview with logo</span>
+            <select id="previewLogoSelect"></select>
+          </label>
+
+          <div class="rm-field">
+            <span class="rm-label">Snap to</span>
+            <div class="rm-snap" role="group" aria-label="Snap logo to a position">
+              <button type="button" data-snap="top-left" title="Top left">↖</button>
+              <button type="button" data-snap="top-right" title="Top right">↗</button>
+              <button type="button" data-snap="center" title="Center">•</button>
+              <button type="button" data-snap="bottom-left" title="Bottom left">↙</button>
+              <button type="button" data-snap="bottom-right" title="Bottom right">↘</button>
+            </div>
+          </div>
+
+          <label class="rm-field">
+            <span class="rm-label">Size <output id="sizeValue">18%</output></span>
+            <input id="sizeRange" type="range" min="2" max="100" step="0.5" value="18" />
+          </label>
+
+          <label class="rm-field">
+            <span class="rm-label">Rotation <output id="rotationValue">0°</output></span>
+            <input id="rotationRange" type="range" min="-180" max="180" step="1" value="0" />
+          </label>
+
+          <div class="rm-field">
+            <span class="rm-label">Anchor inside box</span>
+            <div class="rm-anchor" role="radiogroup" aria-label="Anchor logo inside its box">
+              <button type="button" role="radio" data-ax="left" data-ay="top" aria-label="Top left"></button>
+              <button type="button" role="radio" data-ax="center" data-ay="top" aria-label="Top center"></button>
+              <button type="button" role="radio" data-ax="right" data-ay="top" aria-label="Top right"></button>
+              <button type="button" role="radio" data-ax="left" data-ay="center" aria-label="Middle left"></button>
+              <button type="button" role="radio" data-ax="center" data-ay="center" aria-label="Center"></button>
+              <button type="button" role="radio" data-ax="right" data-ay="center" aria-label="Middle right"></button>
+              <button type="button" role="radio" data-ax="left" data-ay="bottom" aria-label="Bottom left"></button>
+              <button type="button" role="radio" data-ax="center" data-ay="bottom" aria-label="Bottom center"></button>
+              <button type="button" role="radio" data-ax="right" data-ay="bottom" aria-label="Bottom right"></button>
+            </div>
+            <p class="rm-note">Keeps wide and square logos the same distance from the edge.</p>
+          </div>
+
+          <div class="rm-field">
+            <span class="rm-label">Nudge</span>
+            <div class="rm-nudge" role="group" aria-label="Nudge logo">
+              <button type="button" data-nudge="up" aria-label="Nudge up">↑</button>
+              <button type="button" data-nudge="left" aria-label="Nudge left">←</button>
+              <button type="button" data-nudge="down" aria-label="Nudge down">↓</button>
+              <button type="button" data-nudge="right" aria-label="Nudge right">→</button>
+            </div>
+          </div>
+
+          <button id="resetPlacementBtn" class="ghost-button" type="button">Reset to default</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Stamp + export -->
+    <section class="panel rm-panel rm-export" aria-labelledby="exportTitle">
+      <div class="rm-export-main">
+        <div>
+          <p class="rm-step">Step 4</p>
+          <h2 id="exportTitle">Stamp and download</h2>
+          <p id="exportSummary" class="rm-help">Add mockups and at least one logo.</p>
+        </div>
+        <div class="button-row">
+          <button id="cancelStampBtn" class="ghost-button" type="button" hidden>Cancel</button>
+          <button id="stampAllBtn" class="primary-button rm-stamp-btn" type="button" disabled>Stamp all store logos</button>
+        </div>
+      </div>
+      <div id="progressWrap" class="rm-progress" hidden>
+        <div class="rm-progress-bar"><span id="progressFill"></span></div>
+        <p id="progressText" class="rm-note" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/vendor/jszip.min.js"></script>
+  <script src="/ready-mockups.js"></script>
+</body>
+</html>

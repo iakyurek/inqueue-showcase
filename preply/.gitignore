@@ -1,0 +1,10 @@
+node_modules/
+.DS_Store
+test-data/
+playwright-report/
+test-results/
+.env
+.env.local
+google-service-account.json
+credentials/
+*.pem

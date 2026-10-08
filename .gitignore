@@ -1,0 +1,97 @@
+# =============================================================================
+# inQueue monorepo .gitignore
+# Covers all four apps: hub (root), inkly/, preply/, batchly/
+# =============================================================================
+
+# ---------- dependencies & build output ----------
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+out/
+**/out/
+dist/
+build/
+**/build/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---------- OS / IDE / tooling scratch ----------
+.DS_Store
+**/.DS_Store
+.claude/
+**/.claude/
+.vscode/
+.idea/
+
+# ---------- archived nested repos (Phase 1B consolidation) ----------
+# Kept locally as inkly/.git.orphaned-* and batchly/.git.orphaned-* so the
+# old history can be revived by renaming back to .git; never committed.
+.git.orphaned-*
+**/.git.orphaned-*
+
+# ---------- SECRETS: env files ----------
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# ---------- SECRETS: OAuth clients & service accounts ----------
+*service-account*.json
+**/*service-account*.json
+google-oauth-client.json
+**/google-oauth-client.json
+
+# ---------- SECRETS: OAuth tokens & PKCE state ----------
+.tokens/
+**/.tokens/
+**/data/google-oauth-token.json
+google.json
+etsy-pkce-*.json
+**/etsy-pkce-*.json
+
+# ---------- databases (Batchly SQLite dev) ----------
+*.db
+*.db-journal
+**/prisma/dev.db*
+
+# ---------- runtime state & workspaces (never in VCS) ----------
+/data/
+inkly/storage/
+preply/data/
+preply/logs/
+batchly/workspace/
+batchly/workspace/downloads/
+batchly/workspace/pending/
+batchly/workspace/supplemental-images/
+
+# ---------- test artifacts ----------
+test-results/
+**/test-results/
+playwright-report/
+**/playwright-report/
+coverage/
+**/coverage/
+test-data/
+**/test-data/
+
+# ---------- backups, ZIP exports, misc scratch ----------
+*.bak
+**/*.bak
+*.tmp
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Preserve top-level SizeCharts.zip out of VCS — belongs in
+# batchly/workspace/supplemental-images/ per operator workflow.
+SizeCharts.zip
+preply/test_batch.zip
+inkly_batch.zip
+*-batchly-ready.zip
+
+# Vercel (Batchly used to deploy here)
+.vercel

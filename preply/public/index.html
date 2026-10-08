@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>preply</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="/config.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-wrap">
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+          <defs>
+            <linearGradient id="chef-g" x1="4" y1="2" x2="36" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#eef2f9"/>
+              <stop offset="1" stop-color="#8fb6ff"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="28" width="28" height="8" rx="4" fill="url(#chef-g)"/>
+          <rect x="11" y="17" width="18" height="13" fill="url(#chef-g)"/>
+          <ellipse cx="20" cy="15" rx="10" ry="9" fill="url(#chef-g)"/>
+          <rect x="11" y="26" width="18" height="2" rx="1" fill="rgba(10,11,13,0.22)"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <p class="wordmark">preply</p>
+        <div class="product-line">
+          <svg class="iq-logo" viewBox="0 0 30 17" fill="none" xmlns="http://www.w3.org/2000/svg" width="26" height="14">
+            <defs>
+              <linearGradient id="iq-g" x1="0" y1="0" x2="30" y2="17" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#cdd4e0"/>
+                <stop offset="1" stop-color="#8fb6ff"/>
+              </linearGradient>
+            </defs>
+            <circle cx="3" cy="3.5" r="2" fill="url(#iq-g)"/>
+            <rect x="1.5" y="7.5" width="3" height="8.5" rx="1.5" fill="url(#iq-g)"/>
+            <circle cx="19" cy="9.5" r="6" stroke="url(#iq-g)" stroke-width="2.2" fill="none"/>
+            <line x1="23.5" y1="14" x2="28" y2="16.5" stroke="url(#iq-g)" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+          <span>a product of inQueue</span>
+        </div>
+      </div>
+    </div>
+    <nav class="nav-tabs" aria-label="Workflow">
+      <button class="nav-tab active" data-page="upload">Upload Batch</button>
+      <button class="nav-tab" data-page="intake">Metadata Review</button>
+      <button class="nav-tab" data-page="mockup">Mockup Production</button>
+      <button class="nav-tab" data-page="stamp">Stamp</button>
+      <button class="nav-tab" data-page="export">Current Batch</button>
+      <button class="nav-tab" data-page="settings">Store Settings</button>
+    </nav>
+    <a class="header-pill" href="/ready-mockups" title="Stamp store logos onto finished mockups — no Drive, no SKUs">Ready Mockups</a>
+    <a id="inqueueHubLink" href="#" target="_blank" rel="noopener" aria-label="Open inQueue Hub" style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--text-3);border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:var(--bg-2);white-space:nowrap;flex-shrink:0;transition:.2s var(--ease);text-decoration:none;" onmouseover="this.style.color='var(--text-2)';this.style.borderColor='#3a414c'" onmouseout="this.style.color='var(--text-3)';this.style.borderColor='var(--line)'">
+      <svg viewBox="0 0 30 17" fill="none" width="18" height="10" aria-hidden="true"><defs><linearGradient id="iq-hub-g" x1="0" y1="0" x2="30" y2="17" gradientUnits="userSpaceOnUse"><stop stop-color="#cdd4e0"/><stop offset="1" stop-color="#8fb6ff"/></linearGradient></defs><circle cx="3" cy="3.5" r="2" fill="url(#iq-hub-g)"/><rect x="1.5" y="7.5" width="3" height="8.5" rx="1.5" fill="url(#iq-hub-g)"/><circle cx="19" cy="9.5" r="6" stroke="url(#iq-hub-g)" stroke-width="2.2" fill="none"/><line x1="23.5" y1="14" x2="28" y2="16.5" stroke="url(#iq-hub-g)" stroke-width="2.2" stroke-linecap="round"/></svg>
+      Hub
+    </a>
+    <button id="inqueueLogoutBtn" type="button" title="Sign out" style="white-space:nowrap;flex-shrink:0;margin-left:8px;font-size:11.5px;font-weight:700;color:var(--text-3);border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:var(--bg-2);cursor:pointer;">Log out</button>
+  </header>
+  <script>
+    (function () {
+      const hub = (window.INQUEUE_CONFIG && window.INQUEUE_CONFIG.hubUrl) || '';
+      const link = document.getElementById('inqueueHubLink');
+      if (link && hub) link.href = hub;
+      document.getElementById('inqueueLogoutBtn').addEventListener('click', async () => {
+        try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }); }
+        finally { window.location.href = `${hub}/login`; }
+      });
+    })();
+  </script>
+
+  <!-- Workflow progress strip -->
+  <div id="workflowProgressStrip" class="workflow-progress-strip" role="navigation" aria-label="Workflow steps">
+    <div class="wf-steps-row">
+      <div class="wf-step" data-step="upload">
+        <div class="wf-dot" aria-hidden="true"></div>
+        <span class="wf-label">Upload</span>
+      </div>
+      <div class="wf-connector" aria-hidden="true"></div>
+      <div class="wf-step" data-step="intake">
+        <div class="wf-dot" aria-hidden="true"></div>
+        <span class="wf-label">Metadata</span>
+      </div>
+      <div class="wf-connector" aria-hidden="true"></div>
+      <div class="wf-step" data-step="mockup">
+        <div class="wf-dot" aria-hidden="true"></div>
+        <span class="wf-label">Mockups</span>
+      </div>
+      <div class="wf-connector" aria-hidden="true"></div>
+      <div class="wf-step" data-step="stamp">
+        <div class="wf-dot" aria-hidden="true"></div>
+        <span class="wf-label">Stamp</span>
+      </div>
+      <div class="wf-connector" aria-hidden="true"></div>
+      <div class="wf-step" data-step="export">
+        <div class="wf-dot" aria-hidden="true"></div>
+        <span class="wf-label">Export</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="app-shell">
+    <section class="hero-band fade-in">
+      <div>
+        <p class="pill">ZIP (PNGs + manifest_input.csv) → Drive SKU scan → metadata review → mockups → manifest → ZIP</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><strong id="designCount">0</strong><span>designs</span></div>
+        <div class="stat-card"><strong id="activeStoreCount">0</strong><span>active stores</span></div>
+        <div class="stat-card"><strong id="readyCount">0</strong><span>ready</span></div>
+      </div>
+    </section>
+
+    <section id="uploadPage" class="page active">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Upload Batch</p>
+          <h2>Start with a ZIP of sequential PNG designs.</h2>
+        </div>
+        <button id="refreshAssetsBtn" class="ghost-button">Refresh Assets</button>
+      </div>
+      <div class="two-column">
+        <article class="panel">
+          <label class="upload-zone" id="zipUploadZone" for="zipInput">
+            <input id="zipInput" type="file" accept=".zip,application/zip" />
+            <span class="upload-icon" aria-hidden="true">
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width="26" height="26">
+                <defs>
+                  <linearGradient id="chef-g2" x1="4" y1="2" x2="36" y2="40" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#eef2f9"/>
+                    <stop offset="1" stop-color="#8fb6ff"/>
+                  </linearGradient>
+                </defs>
+                <rect x="6" y="28" width="28" height="8" rx="4" fill="url(#chef-g2)"/>
+                <rect x="11" y="17" width="18" height="13" fill="url(#chef-g2)"/>
+                <ellipse cx="20" cy="15" rx="10" ry="9" fill="url(#chef-g2)"/>
+                <rect x="11" y="26" width="18" height="2" rx="1" fill="rgba(10,11,13,0.22)"/>
+              </svg>
+            </span>
+            <strong id="zipUploadLabel">Drop ZIP here or click to upload</strong>
+            <small>ZIP must contain <strong>manifest_input.csv</strong> and designs/D001.png … D030.png</small>
+          </label>
+          <div class="button-row">
+            <button id="createBatchBtn" class="primary-button" disabled>Scan Drive SKUs & Continue</button>
+            <button id="cancelBatchBtn" class="ghost-button" disabled>Cancel Batch</button>
+            <button id="clearOldBatchesBtn" class="ghost-button">Clear Old Batches</button>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-header">
+            <h3>Validation report</h3>
+            <p id="uploadSummary">No ZIP uploaded yet.</p>
+          </div>
+          <div class="source-pill">SKU source: Google Drive</div>
+          <div id="validationReport" class="report-list"></div>
+          <div id="driveRangeReport" class="report-list drive-range-report"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="intakePage" class="page">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Metadata Review</p>
+          <h2>Review metadata loaded from manifest_input.csv.</h2>
+        </div>
+        <button id="continueProductionBtn" class="primary-button" disabled>Continue to Production</button>
+      </div>
+      <div class="workflow-grid">
+        <aside id="intakeList" class="side-list"></aside>
+        <article class="panel intake-panel">
+          <canvas id="intakePreview" class="design-preview"></canvas>
+        </article>
+        <article class="panel form-panel">
+          <div id="csvSourceBadge" class="csv-source-badge" style="display:none">
+            <span class="csv-badge-icon">CSV</span>
+            <span class="csv-source-label">Loaded from manifest_input.csv</span>
+            <button id="editMetadataBtn" class="ghost-button csv-edit-btn" type="button">Edit Metadata</button>
+          </div>
+          <div class="field-group">
+            <label for="titleDescription">Title / Description</label>
+            <textarea id="titleDescription" rows="7" placeholder="Title/description will be loaded from manifest_input.csv" readonly></textarea>
+          </div>
+          <div class="field-group">
+            <label for="keywordsInput">Keywords</label>
+            <textarea id="keywordsInput" rows="6" placeholder="Keywords will be loaded from manifest_input.csv" readonly></textarea>
+            <p id="keywordMeta" class="field-help">0 keywords</p>
+          </div>
+          <div>
+            <h3>Assigned SKUs</h3>
+            <p class="source-note">Source of truth: Google Drive SKU folders</p>
+            <div id="skuPreview" class="sku-list"></div>
+          </div>
+          <div class="button-row">
+            <button id="prevIntakeBtn" class="secondary-button">Previous</button>
+            <button id="nextIntakeBtn" class="primary-button">Next</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="mockupPage" class="page">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Mockup Production</p>
+          <h2>Place designs on mockups and calibrate logo positions.</h2>
+        </div>
+        <div class="section-title-actions">
+          <p id="statusText" class="status-text">Upload a batch to begin.</p>
+          <button id="moveToStampingTopBtn" class="primary-button move-to-stamp-btn" disabled>Move to Stamping →</button>
+        </div>
+      </div>
+
+      <section class="preset-bay panel">
+        <div class="preset-bay-header">
+          <div>
+            <p class="eyebrow">Mockup Presets</p>
+            <h3>Save and reuse mockup selections.</h3>
+          </div>
+          <div class="button-row">
+            <button id="saveSelectionPresetBtn" class="ghost-button" disabled>Save Current as Preset</button>
+            <button id="newPresetBtn" class="secondary-button">New Empty Preset</button>
+          </div>
+        </div>
+        <article class="preset-strip">
+          <strong>Active Preset: <span id="activePresetName">None</span></strong>
+          <span id="presetSelectionStatus">Choose manually or apply a preset.</span>
+        </article>
+        <div id="mockupPresetList" class="preset-grid"></div>
+      </section>
+
+      <div class="workflow-grid production-grid">
+        <aside id="productionList" class="side-list"></aside>
+        <section class="production-main">
+          <article class="panel production-toolbar">
+            <div class="production-toolbar-info">
+              <h3 id="productionTitle">No active design</h3>
+              <p id="productionSubtitle">Complete intake before production.</p>
+            </div>
+            <div class="production-btn-bar">
+              <div class="btn-group-primary">
+                <button id="selectPresetBtn" class="secondary-button" disabled>Select Preset</button>
+                <button id="previewAllBtn" class="secondary-button" disabled>Preview All Mockups</button>
+                <button id="renderBtn" class="primary-button" disabled>Render Mockups</button>
+              </div>
+              <div class="btn-group-secondary">
+                <button id="clearAllBtn" class="ghost-button" disabled>Clear</button>
+                <button id="copyPreviousBtn" class="ghost-button hidden" disabled>Use Previous</button>
+                <button id="selectAllBtn" class="ghost-button hidden" disabled>Select All</button>
+                <button id="revertPresetBtn" class="ghost-button hidden" disabled>Revert to Batch Preset</button>
+                <button id="applyPresetBtn" class="ghost-button hidden">Apply Preset</button>
+                <button id="batchPresetBtn" class="ghost-button hidden">Use Preset for Batch</button>
+                <button id="applyRemainingPresetBtn" class="ghost-button hidden">Apply to Remaining</button>
+                <button id="markReadyBtn" class="ghost-button hidden" disabled>Mark Design Ready</button>
+              </div>
+            </div>
+          </article>
+          <div id="mockupGrid" class="mockup-grid"></div>
+          <article class="panel stamping-handoff">
+            <div>
+              <h3>Done placing mockups for every design?</h3>
+              <p id="stampingHandoffNote">Move this batch into the Stamp tab to apply active store logos. This does not export or touch Google Drive yet.</p>
+            </div>
+            <button id="moveToStampingBtn" class="primary-button move-to-stamp-btn" disabled>Move to Stamping →</button>
+          </article>
+        </section>
+      </div>
+    </section>
+
+    <section id="stampPage" class="page">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Stamp</p>
+          <h2>Stamp active store logos onto produced mockups.</h2>
+        </div>
+        <button id="runStampBtn" class="primary-button btn-with-icon" disabled><svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 3a3.5 3.5 0 0 0-3.5 3.5c0 1.06.47 2.01 1.2 2.66.42.37.66.9.55 1.45l-.33 1.64A1.5 1.5 0 0 1 8.45 13.5H7a3 3 0 0 0-3 3V18a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5a3 3 0 0 0-3-3h-1.45a1.5 1.5 0 0 1-1.47-1.25l-.33-1.64c-.11-.55.13-1.08.55-1.45a3.5 3.5 0 0 0 1.2-2.66A3.5 3.5 0 0 0 12 3Z"/><rect fill="currentColor" x="4" y="20" width="16" height="1.6" rx="0.8"/></svg><span>Stamp Logos for Active Stores</span></button>
+      </div>
+
+      <!-- Stamp progress panel -->
+      <article id="stampProgressPanel" class="panel stamp-progress-panel" style="display:none">
+        <div class="stamp-progress-grid" id="stampProgressGrid"></div>
+      </article>
+
+      <article id="stampEmptyState" class="panel" style="display:none">
+        <h3>This batch isn't ready for stamping yet.</h3>
+        <p>Finish mockup production, then click "Move to Stamping →" on the Mockup Production tab.</p>
+      </article>
+
+      <div id="stampWorkspace" class="stamp-workspace" style="display:none">
+        <!-- Directory tree sidebar + preview panel -->
+        <div class="stamp-layout">
+          <aside class="stamp-directory" id="stampDirectory">
+            <div class="stamp-dir-header">
+              <span>Store / Design / Mockups</span>
+            </div>
+            <div id="stampDirectoryTree" class="stamp-dir-tree"></div>
+          </aside>
+          <section class="stamp-preview-main">
+            <article class="panel production-toolbar">
+              <div>
+                <h3 id="stampPreviewTitle">Select a store and design</h3>
+                <p id="stampPreviewSubtitle">Stamped previews will appear here once you run stamping.</p>
+              </div>
+            </article>
+            <div id="stampPreviewGrid" class="mockup-grid compact-grid"></div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Legacy side-list elements kept for JS compatibility but hidden -->
+      <aside id="stampStoreList" style="display:none"></aside>
+      <aside id="stampDesignList" style="display:none"></aside>
+    </section>
+
+    <section id="exportPage" class="page">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Current Batch</p>
+          <h2>Review your batch, preview files, and export to Batchly.</h2>
+        </div>
+        <div class="button-row">
+          <button id="dryRunBtn" class="secondary-button" disabled>Dry Run Export</button>
+          <button id="exportZipBtn" class="primary-button" disabled>Export Batchly ZIP</button>
+          <div id="exportProgressWrap" class="export-progress" hidden>
+            <div class="export-progress-track"><div id="exportProgressFill" class="export-progress-fill"></div></div>
+            <span id="exportProgressLabel" class="export-progress-label"></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="batchMetricsRow" class="metrics-grid" style="display:none"></div>
+
+      <article id="driveOAuthBanner" class="panel drive-oauth-banner" style="display:none">
+        <div class="drive-oauth-info">
+          <h3 id="driveOAuthTitle">Connect Google Drive</h3>
+          <p id="driveOAuthMessage">Authorize uploads as your Google user so source-design PNGs land in the store's SKU folders.</p>
+        </div>
+        <div class="button-row">
+          <button id="connectDriveBtn" class="primary-button" type="button">Connect Google Drive</button>
+          <button id="disconnectDriveBtn" class="ghost-button" type="button" style="display:none">Disconnect</button>
+        </div>
+      </article>
+
+      <article id="exportSuccessBanner" class="panel export-success-banner" style="display:none">
+        <div class="success-banner-body">
+          <div>
+            <h3 id="exportSuccessTitle">Export complete</h3>
+            <p id="exportSuccessMessage">Your Batchly-ready ZIP downloaded automatically. Follow the steps below to get it into Batchly.</p>
+          </div>
+          <a href="https://drive.google.com/drive/u/0/folders/1yWL_oBayqXL3RK7pjaJxBVBDTt_Qk5E7" target="_blank" rel="noopener" class="primary-button">Open Pending Batches Drive</a>
+        </div>
+        <div id="exportSkuStatus" class="export-sku-status"></div>
+        <ol class="export-instructions">
+          <li>The ZIP downloaded automatically — find it in your Downloads folder.</li>
+          <li>Unzip the exported batch folder.</li>
+          <li>Upload the extracted folder to the Pending Batches Drive folder above.</li>
+          <li>Open Batchly and validate the batch.</li>
+        </ol>
+        <div class="button-row export-reset-row">
+          <button id="resetBatchBtn" class="primary-button" type="button">Reset Batch / Clear Cache</button>
+        </div>
+      </article>
+
+      <article id="folderBrowserPanel" class="panel folder-tree-panel" style="display:none">
+        <div class="panel-header">
+          <h3>Folder structure preview</h3>
+          <p>Shows the exact layout Batchly will receive. Click any file to preview.</p>
+        </div>
+        <div id="folderTreeRoot" class="folder-tree"></div>
+        <div id="filePreviewArea" class="file-preview-area" style="display:none"></div>
+      </article>
+
+      <div class="two-column">
+        <article class="panel">
+          <div class="panel-header">
+            <h3>Batch validation</h3>
+            <p id="exportSummary">No batch ready yet.</p>
+          </div>
+          <div id="exportReport" class="report-list"></div>
+          <div id="driveExportReport" class="report-list drive-range-report"></div>
+          <div id="dryRunReport" class="report-list drive-range-report" style="display:none"></div>
+          <div class="button-row export-actions">
+            <button id="retryDriveBtn" class="secondary-button" disabled>Retry Failed Drive Uploads</button>
+            <button id="refreshSkuBtn" class="secondary-button" disabled title="Re-scan Drive and reserve the next safe SKUs. Does not create folders or upload files.">Refresh SKU Reservation</button>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-header">
+            <h3>Package contents</h3>
+            <p>Manifest CSV, final mockups by store/SKU, source designs, batch info, validation report, and export log.</p>
+          </div>
+          <pre id="manifestPreview" class="manifest-preview"></pre>
+        </article>
+      </div>
+    </section>
+
+    <section id="settingsPage" class="page">
+      <div id="settingsWarnings" class="settings-warnings" style="display:none"></div>
+
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Connections</p>
+          <h2>Google Drive and Batchly handoff.</h2>
+        </div>
+        <div class="button-row">
+          <button id="refreshConnectionsBtn" class="ghost-button" type="button">Refresh</button>
+        </div>
+      </div>
+      <div id="connectionSettingsGrid" class="connection-grid"></div>
+
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Store Status</p>
+          <h2>Store readiness — configured in the inQueue Hub.</h2>
+        </div>
+        <div class="button-row">
+          <a id="hubConfigureLink" class="primary-button" href="#" target="_blank" rel="noopener">Configure in inQueue Hub ↗</a>
+        </div>
+      </div>
+      <div id="storeSettingsList" class="store-grid"></div>
+    </section>
+  </main>
+
+  <!-- Unified adjust dialog: single canvas, click-to-select layer -->
+  <dialog id="editDialog" class="edit-dialog">
+    <div class="editor-shell">
+      <div class="editor-header">
+        <div>
+          <h3 id="editorTitle">Edit mockup</h3>
+          <!-- Layer selector — set by clicking the canvas -->
+          <div class="layer-selector" id="layerSelector" role="group" aria-label="Active overlay">
+            <button id="layerDesignBtn" class="layer-btn active" type="button" aria-pressed="true">Design</button>
+            <button id="layerStoreLogoBtn" class="layer-btn" type="button" aria-pressed="false">Store Logo</button>
+            <button id="layerShippingBtn" class="layer-btn" type="button" aria-pressed="false">Shipping Logo</button>
+          </div>
+        </div>
+        <button id="closeEditorBtn" class="icon-button" aria-label="Close editor">×</button>
+      </div>
+
+      <p class="editor-calibration-info hint" id="editorLayerHint">Click an overlay on the canvas to select it for editing. Drag to move, drag handles to resize.</p>
+
+      <!-- Single unified canvas -->
+      <div class="editor-canvas-wrap"><canvas id="editorCanvas"></canvas></div>
+
+      <!-- Design placement controls -->
+      <div id="editorDesignControls" class="editor-controls">
+        <div class="nudge-pad">
+          <span></span><button data-nudge="up">↑</button><span></span>
+          <button data-nudge="left">←</button><button data-nudge="center">Center</button><button data-nudge="right">→</button>
+          <span></span><button data-nudge="down">↓</button><span></span>
+        </div>
+        <div class="control-stack">
+          <div class="slider-group">
+            <label for="scaleRange">Resize design</label>
+            <input id="scaleRange" type="range" min="45" max="180" value="100" />
+            <div class="mini-row"><button id="smallerBtn" class="ghost-button">Smaller</button><span id="scaleValue">100%</span><button id="largerBtn" class="ghost-button">Larger</button></div>
+          </div>
+          <div class="slider-group">
+            <label>Rotate design</label>
+            <div class="rotate-row">
+              <button id="rotateLeftBtn" class="ghost-button">↺</button>
+              <button id="straightenBtn" class="ghost-button">Straighten</button>
+              <button id="rotateRightBtn" class="ghost-button">↻</button>
+            </div>
+            <div class="mini-row"><span>Current rotation</span><span id="rotationValue">0°</span></div>
+          </div>
+          <p class="hint" style="grid-column:1/-1">Arrow keys to nudge. Save Placement stores this position for all future designs on this mockup.</p>
+        </div>
+      </div>
+
+      <!-- Logo placement controls (store logo & shipping logo share these) -->
+      <div id="editorLogoControls" class="editor-controls stamp-editor-controls" style="display:none">
+        <div class="control-stack stamp-control-stack">
+          <div class="slider-group">
+            <label for="stampScaleRange">Resize logo</label>
+            <input id="stampScaleRange" type="range" min="35" max="220" value="100" />
+            <div class="mini-row"><button id="stampSmallerBtn" class="ghost-button">Smaller</button><span id="stampScaleValue">100%</span><button id="stampLargerBtn" class="ghost-button">Larger</button></div>
+          </div>
+          <div class="slider-group">
+            <label>Rotate logo</label>
+            <div class="rotate-row">
+              <button id="stampRotateLeftBtn" class="ghost-button">↺</button>
+              <button id="stampStraightenBtn" class="ghost-button">Straighten</button>
+              <button id="stampRotateRightBtn" class="ghost-button">↻</button>
+            </div>
+            <div class="mini-row"><span>Current rotation</span><span id="stampRotationValue">0°</span></div>
+          </div>
+          <p class="hint" style="grid-column:1/-1">Arrow keys to nudge. Save Logo Preset stores these coordinates for every store's logo on this mockup.</p>
+        </div>
+      </div>
+
+      <div class="editor-footer">
+        <button id="downloadCurrentBtn" class="secondary-button">Download Preview</button>
+        <button id="savePresetBtn" class="secondary-button">Save Design Placement</button>
+        <button id="saveStampPresetBtn" class="secondary-button">Save Logo Placement</button>
+        <button id="saveEditorBtn" class="primary-button">Apply & Close</button>
+      </div>
+
+      <!-- Keep legacy stamp controls hidden so existing event bindings don't throw -->
+      <div style="display:none" aria-hidden="true">
+        <button id="editStoreLogoBtn" type="button"></button>
+        <button id="editFreeShippingBtn" type="button"></button>
+        <button id="applyStampChangesBtn" type="button"></button>
+        <button id="downloadStampedCurrentBtn" type="button"></button>
+        <canvas id="stampEditorCanvas" style="display:none"></canvas>
+      </div>
+    </div>
+  </dialog>
+
+  <template id="cardTemplate">
+    <article class="mockup-card">
+      <label class="mockup-select-wrap"><input class="mockup-select" type="checkbox" /><span>Use</span></label>
+      <div class="mockup-preview-wrap"><canvas class="mockup-canvas"></canvas></div>
+      <div class="mockup-card-footer">
+        <div><strong class="mockup-name"></strong><span class="mockup-meta"></span></div>
+        <div class="card-actions"><button class="favorite-btn ghost-button" title="Favorite">☆</button><button class="edit-btn ghost-button">Adjust</button><button class="download-btn secondary-button">Download</button></div>
+      </div>
+    </article>
+  </template>
+
+  <template id="stampedCardTemplate">
+    <article class="mockup-card stamped-card">
+      <div class="mockup-preview-wrap"><canvas class="mockup-canvas"></canvas></div>
+      <div class="mockup-card-footer">
+        <div><strong class="mockup-name"></strong><span class="mockup-meta"></span></div>
+        <div class="card-actions"><button class="edit-stamps-btn ghost-button">Edit Stamps</button><button class="download-btn secondary-button">Download</button></div>
+      </div>
+    </article>
+  </template>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Saved</div>
+  <script src="/vendor/jszip.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
